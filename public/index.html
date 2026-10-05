@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="GoFocus: a distraction-free study timer. Study only from the videos you chose.">
+  <meta name="theme-color" content="#1B8A5A">
+  <title>GoFocus</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%231B8A5A'/%3E%3Ccircle cx='16' cy='16' r='5' fill='%23FF8552'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="bg-blob blob-1"></div>
+  <div class="bg-blob blob-2"></div>
+
+  <!-- ===== AUTH ===== -->
+  <main id="auth-view" class="auth hidden">
+    <section class="card auth-card">
+      <div class="logo"><span class="logo-dot"></span><h1>GoFocus</h1></div>
+      <p class="muted" id="auth-sub">Study only from the videos you chose. No recommendations, no rabbit holes.</p>
+      <div class="tabs" role="tablist">
+        <button class="tab active" id="tab-login" type="button" role="tab">Log in</button>
+        <button class="tab" id="tab-register" type="button" role="tab">Sign up</button>
+      </div>
+      <form id="auth-form" novalidate>
+        <label class="field hidden" id="name-field">Name
+          <input id="auth-name" type="text" autocomplete="name" maxlength="60">
+        </label>
+        <label class="field">Email
+          <input id="auth-email" type="email" autocomplete="email" required>
+        </label>
+        <label class="field">Password
+          <input id="auth-password" type="password" autocomplete="current-password" minlength="8" required>
+        </label>
+        <p id="auth-error" class="form-error" role="alert"></p>
+        <button class="btn primary wide" id="auth-submit" type="submit">Log in</button>
+      </form>
+    </section>
+  </main>
+
+  <!-- ===== APP ===== -->
+  <div id="app-view" class="hidden">
+    <header class="topbar">
+      <div class="logo"><span class="logo-dot"></span><h1>GoFocus</h1></div>
+      <nav class="nav" aria-label="Main">
+        <a href="#/focus" class="nav-link" data-page="focus">Focus</a>
+        <a href="#/progress" class="nav-link" data-page="progress">Progress</a>
+        <a href="#/rewards" class="nav-link" data-page="rewards">Rewards</a>
+        <a href="#/goals" class="nav-link" data-page="goals">Goals</a>
+      </nav>
+      <div class="top-actions">
+        <span class="chip" id="streak-chip" title="Current streak">🔥 0</span>
+        <button class="icon-btn" id="theme-toggle" type="button" aria-label="Toggle dark mode">🌙</button>
+        <button class="btn ghost small" id="logout-btn" type="button">Log out</button>
+      </div>
+    </header>
+
+    <main class="page-wrap">
+      <!-- FOCUS -->
+      <section class="page" id="page-focus">
+        <p class="greeting" id="greeting"></p>
+        <div class="grid-2">
+          <div class="card timer-card">
+            <div class="ring-wrap">
+              <svg class="ring" viewBox="0 0 260 260" aria-hidden="true">
+                <defs>
+                  <linearGradient id="ring-grad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="var(--primary)"/>
+                    <stop offset="100%" stop-color="var(--secondary)"/>
+                  </linearGradient>
+                </defs>
+                <circle class="ring-track" cx="130" cy="130" r="118"/>
+                <circle class="ring-progress" id="ring-progress" cx="130" cy="130" r="118" stroke="url(#ring-grad)"/>
+              </svg>
+              <div class="ring-center">
+                <div id="time-display" class="time" aria-live="off">25:00</div>
+                <div id="timer-status" class="muted small-text">Ready when you are</div>
+              </div>
+            </div>
+            <div id="duration-options" class="chips" role="group" aria-label="Session length"></div>
+            <div class="btn-row">
+              <button class="btn primary" id="start-btn" type="button">Start</button>
+              <button class="btn" id="pause-btn" type="button" disabled>Pause</button>
+              <button class="btn ghost" id="reset-btn" type="button">Reset</button>
+            </div>
+            <p class="switch-count" id="switch-count">Tab switches this session: <strong>0</strong></p>
+            <p class="hint">Press <kbd>Space</kbd> to start or pause</p>
+            <blockquote class="quote" id="quote"></blockquote>
+          </div>
+
+          <div class="stack">
+            <div class="card player-card" id="video-container">
+              <div class="player-empty">
+                <div class="play-icon">▶</div>
+                <p>Pick one of your videos below to play it here</p>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-head">
+                <h3>Today's picks</h3>
+                <span class="chip" id="picks-count">0 / 5</span>
+              </div>
+              <form id="video-form" class="inline-form" novalidate>
+                <input id="video-input" type="url" placeholder="Paste a YouTube video or playlist link" aria-label="YouTube link">
+                <button class="btn primary" type="submit">Add</button>
+              </form>
+              <ul id="video-list" class="picks"></ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROGRESS -->
+      <section class="page" id="page-progress">
+        <h2 class="page-title">Your progress</h2>
+        <div class="tiles" id="tiles"></div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-head"><h3>Last 7 days</h3><span class="muted small-text">minutes focused</span></div>
+            <div id="week-chart" class="chart"></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>Consistency</h3><span class="muted small-text">last 12 weeks</span></div>
+            <div id="heatmap" class="chart"></div>
+            <div class="legend"><span>Less</span><i class="lv lv0"></i><i class="lv lv1"></i><i class="lv lv2"></i><i class="lv lv3"></i><i class="lv lv4"></i><span>More</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- REWARDS -->
+      <section class="page" id="page-rewards">
+        <h2 class="page-title">Rewards</h2>
+        <div class="grid-2">
+          <div class="card jar-card">
+            <h3>Focus Jar</h3>
+            <svg id="jar-svg" width="170" height="220" viewBox="0 0 150 200" aria-label="Candy jar">
+              <defs>
+                <linearGradient id="jar-grad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" class="stop-a"/><stop offset="100%" class="stop-b"/>
+                </linearGradient>
+              </defs>
+              <clipPath id="jar-clip">
+                <path d="M 40 20 L 110 20 L 110 40 L 125 60 L 125 180 Q 125 195 110 195 L 40 195 Q 25 195 25 180 L 25 60 L 40 40 Z"/>
+              </clipPath>
+              <g clip-path="url(#jar-clip)">
+                <rect id="jar-fill" x="20" y="20" width="110" height="175" fill="url(#jar-grad)"/>
+              </g>
+              <path d="M 40 20 L 110 20 L 110 40 L 125 60 L 125 180 Q 125 195 110 195 L 40 195 Q 25 195 25 180 L 25 60 L 40 40 Z" fill="none" stroke="var(--primary)" stroke-width="4"/>
+            </svg>
+            <p id="candy-count" class="big-num">0 candies</p>
+            <p id="jar-level" class="muted"></p>
+            <p class="hint">Finish a session: 2 candies. Zero tab switches: +1 bonus.</p>
+          </div>
+          <div class="card">
+            <h3>Badges</h3>
+            <ul id="badges" class="badges"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- GOALS -->
+      <section class="page" id="page-goals">
+        <h2 class="page-title">Goals and mindset</h2>
+        <div class="grid-2">
+          <div class="card">
+            <h3>Today's goal</h3>
+            <form id="goal-form" class="inline-form" novalidate>
+              <input id="goal-input" type="text" maxlength="200" placeholder="e.g. Complete 3 focus sessions" aria-label="Today's goal">
+              <button class="btn primary" type="submit">Save</button>
+            </form>
+            <p id="current-goal" class="goal-text muted">No goal set for today yet.</p>
+          </div>
+          <div class="card">
+            <h3>Affirmations</h3>
+            <form id="aff-form" class="inline-form" novalidate>
+              <input id="aff-input" type="text" maxlength="140" placeholder="Something kind to tell yourself" aria-label="Affirmation">
+              <button class="btn primary" type="submit">Add</button>
+            </form>
+            <ul id="aff-list" class="affs"></ul>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast-container" aria-live="polite"></div>
+  <div id="confetti"></div>
+  <script src="js/app.js"></script>
+</body>
+</html>
